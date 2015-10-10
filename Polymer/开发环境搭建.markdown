@@ -1,0 +1,46 @@
+# 开发环境搭建
+
+标签（空格分隔）： Polymer
+
+---
+
+[TOC]
+
+本文针对Windows平台搭建开发环境，Linux平台暂不涉及。
+
+## 安装Node.js
+### 下载Node.js
+
+老规矩，上官方网站下载，地址：https://nodejs.org/download/
+
+![](http://www.runoob.com/wp-content/uploads/2014/03/nodejs_download.jpg)
+
+根据不同平台系统选择你需要的Node.js安装包。
+
+Windows装软件，你懂的。[不懂的戳这里](http://www.runoob.com/nodejs/nodejs-install-setup.html)
+
+## 安装bower
+
+安装教程看官网！[或者戳这里](http://bower.io/)
+  
+
+## 安装nginx
+
+
+
+## 安装git
+
+[git下载地址][1] 一般会自动下载，如果没有自动下载，选择windows下32位或者64位的版本下载即可。
+![下载版本截图][2]
+
+
+## 安装maven
+
+[maven下载地址][3]
+[maven配置教程][4]
+
+
+  [1]: https://git-scm.com/download/win
+  [2]: http://static.zybuluo.com/Jack2code/adekvqy1wddlet8dg4jtwvux/QQ%E6%88%AA%E5%9B%BE20150914000531.jpg
+  [3]: https://maven.apache.org/download.html
+  [4]: http://maven.oschina.net/help.html

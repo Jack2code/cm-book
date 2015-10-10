@@ -1,0 +1,46 @@
+# 应用文件上传
+
+标签（空格分隔）： NaaS-Controller
+
+---
+[TOC]
+
+## 什么是 Java Web Start？
+Java Web Start 是一个软件技术，它包含了 applet 的可移植性、Servlet 和 JavaServer Pages （JSP）的可维护性以及象 XML 和 HTML 这样的标记语言的简易性。它是基于 Java 的应用程序，允许从标准的 Web 服务器启动、部署和更新功能完全的 Java 客户机应用程序。在第一次启动 Java Web Start 时，用户可以从 Web 下载新的客户机应用程序；之后这些应用程序可以通过 Web 页面的链接或（Windows 中的）桌面图标或“开始”菜单初始化。应用程序在 Java Web Start 下快速初始化，被高速缓存在客户机，并且可以远程的离线启动。
+由于 Java Web Start 自身是一个 Java 应用程序，所以该软件是平台独立的。当客户机应用程序启动时，Java Web Start 自动执行更新，在从原来的高速缓存（倘若存在高速缓存）装入应用程序的同时，从 Web 下载最新的代码。Java Web Start 还提供了一个 Java 应用程序管理器（Java Application Manager）实用程序，既提供了多种选项，如清除下载的应用程序的高速缓存、指定多种 JRE 的使用、设置 HTTP 代理，还允许最终用户组织他们的 Java 应用程序。
+
+
+## 用 Java Web Start 启动应用程序
+当用户首次单击一个链接来启动一个客户端的 Java 应用程序时，发生下面的过程：
+
+* Web 浏览器被指示运行 Java Web Start。
+* Java Web Start 以启动闪屏开始
+* 然后 Java Web Start 与指定的 Web 服务器联系，并且确定是否为所要的 Java 应用程序下载了所有的文件。
+* 把适当的文件下载到本地机。
+* Java Web Start 运行下载的应用程序。
+
+## 要考虑的问题
+
+* Java Web Start 必须安装在每台从 Web 或从 Java 应用程序管理器启动客户机 Java 应用程序的机器上。所以，虽然客户机 Java 应用程序可以从 Web 页面启动，但如果最初没有 Java Web Start 安装在本地机上的话，该应用程序本身是不能启动的；这样 Web 浏览器仅提供启动程序的方便的链接 ― 不多不少。
+* Java Web Start 仅对正确打包的并且依照 Java Web Start 指导方针的应用程序有用。另外，需要 Web 服务器，而且 Web 服务器必须正确的配置来解释 所有的JNLP 和 MIME 标记。所以，除非下载的或是从 Web 启动的所有的客户机 Java 应用程序满足了这些要求，每个客户机 Java 应用程序才能从 Java Web Start 被启动和被管理的。
+* 在用户中也许有点关于 Java Web Start 和 Java 插件的应用程序与 applet 间的不同之处的困惑。用户可能理解或还不理解为什么 Java Web Start 能管理和启动许多的客户机 Java 应用程序，却不能与以 Java 插件运行的 Java Applets 建立任何连接，尽管事实是任一程序都可以从 Web 浏览器启动。
+* 对于被要求去为仅仅一个客户机应用程序而下载 Java Web Start 的用户来说，可能又认为对一个客户机 Java 应用程序的执行来说，Java Web Start 应用程序管理器的特性很累赘，安装过程“麻烦”太多。
+
+## Java Web Start 中的版本变化
+实施 Java Web Start部署的步骤：
+
+* 应用程序所用的文件存储在 JAR 文件。
+* 必须创建一个 JNLP 来通知 Java Web Start 应用程序使用哪些 JAR 文件、如何下载必要的文件等。
+* 一个标准的 Web 服务器被配置来接受被 Java Web Start 理解的 MIME 类型。
+* JAR 文件放在了 Web 服务器上。
+* 用户需要下载和安装 Java Web Start（仅一次）。
+* 用户首次运行应用程序；JAR 文件被下载并执行。
+* 用户可以再次运行应用程序，从 Java Web Start 应用程序管理器或 Web 页面启动。Java Web Start 将下载需要更新的全部文件，并且然后将启动应用程序。
+
+
+
+
+
+
+
+

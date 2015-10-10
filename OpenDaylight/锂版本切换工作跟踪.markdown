@@ -1,0 +1,137 @@
+# 锂版本切换工作跟踪
+
+标签（空格分隔）： OpenDaylight
+
+
+---
+[TOC]
+
+>锂版本切换工作内容：
+>
+>1. yang定义的notification不具备集群特性；
+>2. MD-SAL并行加载，无法保证notification的订阅与发布时序（解决方法config-system）。
+
+
+## yang定义的notification不具备集群特性
+
+
+## 代码变化
+- 在lithium版本中，BindingAwareBroker.java文件，registerFunctionality和unregisterFunctionality两个过期方法被移除。
+```java
+/**
+ * {@link BindingAwareProvider} specific access to the SAL functionality.
+ *
+ * <p>
+ * ProviderSession is {@link BindingAwareProvider}-specific access to the
+ * SAL functionality and infrastructure services, which also allows for
+ * exposing the provider's functionality to the other
+ * {@link BindingAwareConsumer}s.
+ *
+ * <p>
+ * The session serves to store SAL context (e.g. registration of
+ * functionality) for the providers and exposes access to the SAL
+ * infrastructure services, dynamic functionality registration and any other
+ * functionality provided by other {@link BindingAwareConsumer}s.
+ *
+ */
+public interface ProviderContext extends ConsumerContext, RpcProviderRegistry {
+
+    @Deprecated
+    void registerFunctionality(ProviderFunctionality functionality);
+
+    @Deprecated
+    void unregisterFunctionality(ProviderFunctionality functionality);
+}
+```
+暂时来看，如果使用ADSAL，升级到lithium版本无影响。
+
+- 在lithium版本中，BindingAwareBroker.java文件，registerConsumer和registerProvider两个方法参数有变。
+
+```Java
+@Deprecated
+ConsumerContext registerConsumer(BindingAwareConsumer consumer, BundleContext ctx);
+改成了
+ConsumerContext registerConsumer(BindingAwareConsumer consumer);
+
+@Deprecated
+ProviderContext registerProvider(BindingAwareProvider provider, BundleContext ctx);
+改成了
+ProviderContext registerProvider(BindingAwareProvider provider);
+```
+
+## Notification
+核心代码`DOMNotificationRouter.java`
+```
+controller/opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMNotificationRouter.java
+```
+
+```java
+private DOMNotificationRouter(final ExecutorService executor, final int queueDepth, final WaitStrategy strategy) {
+    this.executor = Preconditions.checkNotNull(executor);
+
+    disruptor = new Disruptor<>(DOMNotificationRouterEvent.FACTORY, queueDepth, executor, ProducerType.MULTI, strategy);
+    disruptor.handleEventsWith(DISPATCH_NOTIFICATIONS);
+    //handler DISPATCH_NOTIFICATIONS must process events before handler NOTIFY_FUTURE
+    disruptor.after(DISPATCH_NOTIFICATIONS).handleEventsWith(NOTIFY_FUTURE);
+    disruptor.start();
+}
+```
+创建了两个`event processor`（*`DISPATCH_NOTIFICATIONS`*/*`NOTIFY_FUTURE`*），在`disruptor start()`方法中会将`event processor`（实现了Runnable）submit给executor，因此两个`event processor`调用的各自`event handler`是单线程。
+
+start()方法的代码如下：
+```java
+/**
+ * <p>Starts the event processors and returns the fully configured ring buffer.</p>
+ *
+ * <p>The ring buffer is set up to prevent overwriting any entry that is yet to
+ * be processed by the slowest event processor.</p>
+ *
+ * <p>This method must only be called once after all event processors have been added.</p>
+ *
+ * @return the configured ring buffer.
+ */
+public RingBuffer<T> start()
+{
+    Sequence[] gatingSequences = consumerRepository.getLastSequenceInChain(true);
+    ringBuffer.addGatingSequences(gatingSequences);
+
+    checkOnlyStartedOnce();
+    for (ConsumerInfo consumerInfo : consumerRepository)
+    {
+        consumerInfo.start(executor);
+    }
+
+    return ringBuffer;
+}
+```
+
+## config-system
+>The config subsystem of the OpenDaylight Controller provides two key features:
+
+>A uniform way to express configuration that can be read in from a file updated at run time
+>A uniform way to express requirements on other services
+
+
+## 锂版本问题
+1. He版本时平台提供的Notification使用的是多线程机制,在切换到Li版本之后变成了单线程
+Q1：整个AC平台的Notification和处理都是在唯一一个线程中做处理的,这点无疑会成为最大的性能瓶颈？
+*待分析*
+
+---
+Q2：最新的切换到锂版本 notification pubsh出去 监听的收不到了
+A2：由于其他Bundle挂掉，导致消费者线程挂掉，notification就不可用。
+
+---
+Q3：目前li版本里app或dirsuptor自身发送异常时，会造成消费者线程挂掉，消息传递系统不可用
+A3：
+
+---
+2. 
+
+
+
+
+
+
+
+

@@ -1,0 +1,269 @@
+# 文件上传测试环境搭建
+
+标签（空格分隔）： NaaS-Controller
+
+---
+[TOC]
+
+## 1 准备工作
+
+- 下载ngx-dav-ext-module模块，这个模块提供webdav的完整功能。
+- 下载nginx源码
+- 需要先安装nginx源码编译的依赖，主要是zlib、pcre、openssl、expat等。
+
+## 2 下载
+### 2.1 下载nginx源码
+
+>邮件的附件里已有nginx 1.7.6版本的源码。
+
+直接到[nginx](http://nginx.org/en/download.html)的官网上进行下载即可，下载链接：http://nginx.org/en/download.html。
+
+下载后，把`nginx-1.x.x.tar.gz`文件拷贝到需要安装nginx的服务器上，例如/usr/local/src目录下。
+
+### 2.2 下载ngx-dav-ext-module模块源码
+
+>邮件的附件里已有ngx-dav-ext-module模块源码。
+
+进入[nginx-dav-ext-module](https://github.com/arut/nginx-dav-ext-module)的Github页面，链接地址：https://github.com/arut/nginx-dav-ext-module，选择右侧的`Download ZIP`，进行nginx源码下载。
+或者直接下载：https://github.com/arut/nginx-dav-ext-module/archive/master.zip。
+
+下载后，把`mater.zip`文件拷贝到服务器上，例如/usr/local/src目录下。
+
+### 2.3 下载zlib
+
+>如果已安装，请忽略。
+>邮件的附件里已有zlib 1.2.8版本的源码。
+
+进入[zlib](http://www.zlib.net/)的官网进行下载即可，下载链接：http://www.zlib.net/。
+
+在页面的中部，找到tar.gz格式的zlib，然后选择[US（zlib.net）](http://zlib.net/zlib-1.2.8.tar.gz)或者[Pick a mirror (prdownloads.sourceforge.net)](http://prdownloads.sourceforge.net/libpng/zlib-1.2.8.tar.gz?download)均可。
+
+直接官网下载链接：http://zlib.net/zlib-1.2.8.tar.gz。
+
+下载后，把文件`zlib-1.2.8.tar.gz`拷贝到服务器上，例如/usr/local/src目录下。
+
+### 2.4 下载pcre
+
+>如果已安装，请忽略。
+>邮件的附件里已有pcre 8.35版本的源码。
+
+同样到[pcre](http://www.pcre.org/)官网上下载，pcre 8.35版本的下载链接：http://sourceforge.net/projects/pcre/files/pcre/8.35/pcre-8.35.tar.gz/download。
+
+下载后，把文件`pcre-8.35.tar.gz`拷贝到服务器上，例如/usr/local/src目录下。
+
+### 2.5 下载openssl
+
+>如果已安装，请忽略。
+>邮件的附件里已有openssl 1.0.2版本的源码。
+
+到[openssl](https://www.openssl.org/source/)官网下载，下载链接：https://www.openssl.org/source/openssl-1.0.2.tar.gz。
+
+下载后，把文件`openssl-1.0.2.tar.gz`拷贝到服务器上，例如/usr/local/src目录下。
+
+### 2.6 下载expat
+
+>如果已安装，请忽略。
+>邮件的附件里已有expat的源码。
+
+下载链接：http://sourceforge.net/projects/expat/files/expat/2.1.0/expat-2.1.0.tar.gz/download。
+
+下载后，把文件`expat-2.1.0.tar.gz`拷贝到服务器上，例如/usr/local/src目录下。
+
+## 3 安装
+### 3.1 安装zlib
+
+>如果已安装，请忽略。当前ISO已安装，可忽略。
+
+解压，编译：
+```
+#进入zlib安装包所在目录
+cd /usr/local/src
+
+#解压zlib安装包
+tar zxvf zlib-1.2.8.tar.gz
+
+#进入解压后的文件夹
+cd /usr/local/src/zlib-1.2.8
+
+#配置
+./configure
+
+#编译
+make
+
+#安装
+make install（非root权限：sudo make install)
+```
+
+### 3.2 安装pcre
+
+>如果已安装，请忽略。当前ISO已安装，可忽略。
+
+解压，编译：
+```
+#进入zlib安装包所在目录
+cd /usr/local/src
+
+#解压zlib安装包
+tar zxvf pcre-8.35.tar.gz
+
+#进入解压后的文件夹
+cd /usr/local/src/pcre-8.35
+
+#配置
+./configure
+
+#编译
+make
+
+#安装
+make install（非root权限：sudo make install)
+```
+
+### 3.3 安装openssl
+
+>如果已安装，请忽略。在源码安装nginx时需要指定openssl目录，指向该安装目录。
+
+解压，编译：
+```
+#进入zlib安装包所在目录
+cd /usr/local/src
+
+#解压zlib安装包
+tar zxvf openssl-1.0.2.tar.gz
+
+#进入解压后的文件夹
+cd /usr/local/src/openssl-1.0.2
+
+#配置
+./config
+
+#编译
+make
+
+#安装
+make install（非root权限：sudo make install)
+```
+
+测试是否安装成功
+```
+openssl version #是否新安装的版本
+```
+
+### 3.4 安装expat
+
+>如果已安装，请忽略。当前ISO已安装，可忽略。
+
+解压，编译：
+```
+#进入zlib安装包所在目录
+cd /usr/local/src
+
+#解压zlib安装包
+tar zxvf expat-2.1.0.tar.gz
+
+#进入解压后的文件夹
+cd /usr/local/src/expat-2.1.0
+
+#配置
+./configure
+
+#编译
+make
+
+#安装
+make install（非root权限：sudo make install)
+```
+
+### 3.5 安装nginx
+
+>当前ISO的nginx是通过rpm包安装的，无法提供WebDAV完整功能支持，故需要源码编译nginx。
+
+解压，安装，需要注意添加ssl配置，否则无法开启ssl功能
+
+```
+#解压nginx-dav-ext-module-master.zip
+unzip nginx-dav-ext-module-master.zip
+
+#解压nginx-1.4.7.tar.gz
+tar zxvf nginx-1.4.7.tar.gz
+
+#进入文件平
+cd nginx-1.4.7
+
+#配置
+./configure --prefix=/usr/local/nginx --sbin-path=/usr/local/nginx/nginx --conf-path=/usr/local/nginx/nginx.conf --pid-path=/usr/local/nginx/nginx.pid --with-http_dav_module --add-module=../nginx-dav-ext-module-master --with-http_ssl_module --with-openssl=/usr/local/src/openssl-1.0.2
+
+#编译
+make 
+
+#安装
+make install
+```
+
+## 4 配置nginx
+
+### 4.1 上传配置
+修改nginx.conf，在http节点下添加一个server节点，同时需要创建data目录
+
+样例：
+```
+server {
+    listen 18018;
+    server_name localhost;
+    
+    location / {
+        root   html;
+        dav_methods PUT DELETE MKCOL COPY MOVE;
+        dav_ext_methods PROPFIND OPTIONS;
+        index  index.html index.htm;
+        client_body_temp_path /usr/local/nginx/html/data; #data目录需要创建，data是上传的根目录
+        create_full_put_path on;
+        dav_access  group:rw all:r;
+    }
+}
+```
+
+### 4.2 下载配置
+
+修改nginx.conf，在http节点下添加一个server节点，
+
+样例：
+```
+server {
+    listen 18019;
+    server_name localhost;
+    
+    location / {
+        root html/data; #下载的根目录
+        autoindex on;
+    }
+}
+```
+## 5 启动nginx
+
+nginx现在是开机启动，放在`/etc/init.d/`目录下，因此，重新编译的nginx还是放在该目录下。
+
+如果该目录下已有nginx，可以先将旧的nginx备份，
+```
+mv /etc/init.d/nginx /etc/init.d/nginx.old
+```
+然后再创建软链接，将nginx链接到该目录下
+```
+ln -s /usr/local/nginx/nginx /etc/init.d/
+```
+
+### 可能遇到的错误
+1. 启动nginx提示：error while loading shared libraries: libpcre.so.1: cannot open shared object file: No such file or directory，意思是找不到libpcre.so.1这个模块，而导致启动失败。
+```
+./nginx: error while loading shared libraries: libpcre.so.1: cannot open shared object file: No such file or directory
+```
+如果是32位系统
+```
+ln -s /usr/local/lib/libpcre.so.1 /lib
+```
+如果是64位系统
+```
+ln -s /usr/local/lib/libpcre.so.1 /lib64
+```
+然后重新启动nginx就OK了.

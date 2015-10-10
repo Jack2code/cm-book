@@ -1,0 +1,54 @@
+##性能管理整体方案
+
+标签（空格分隔）： 性能采集
+
+---
+[TOC]
+
+## 背景
+Ceilometer是OpenStack的性能采集服务，而且是采集OpenStack各服务组件及VM的性能数据，并不能采集设备数据，也不对外提供存储外部数据的接口。因此，仅仅依靠ceilometer无法完成设备性能数据采集。
+
+对于性能数据查询，Ceilometer只提供单指标项查询，无法一次查询多个指标项的性能数据，需要多次查询获得多指标项的性能数据。经测试，调用ceilometer restful接口查询数据性能一般，如需要显示如下图所示的列表，性能很差，需要提升查询性能。因此，需要支持多指标项性能数据查询。
+
+![性能数据列表](http://rnd-github.huawei.com/l00210728/nim/blob/master/performance&alarm/pic/performance-data-list.png?raw=true)
+
+## 性能管理整体方案
+性能管理整体方案，如下图所示：
+![性能管理整体方案](http://rnd-github.huawei.com/l00210728/nim/blob/master/performance&alarm/pic/performance-structure.png?raw=true)
+
+性能采集包括**设备性能采集**和**VM性能采集**两部分。
+![性能采集](http://rnd-github.huawei.com/l00210728/nim/blob/master/performance&alarm/pic/performance-data-collect.png?raw=true)
+其中，VM性能数据通过部署在VM所在节点上的Compute Agent来采集数据，Compute Agent通过Libvirt与Hypervisor交互，并采集性能数据；
+设备性能数据是由南向模块通过Netconf接口从设备上采集性能数据；
+
+从上面的图中，可以看到左侧应该全部属于ODL系统的模块，却有一个属于OPS系统的Ceilometer DB Agent模块，该模块是一个特殊的模块，其实它是将Ceilometer的存储部分代码包装嵌入到性能模块中，因此存储设备性能数据时，是由性能模块直接调用DB Agent的接口进行数据存储，DB Agent会创建与Ceilometer MongoDB的连接并将数据保存到MongoDB中。
+
+### 设备性能采集
+1. 性能模块定时器启动，定时轮询南向的性能采集接口；
+2. 南向调用Netconf接口去采集设备性能数据；
+3. 南向从设备获取性能数据；
+4. 性能模块获取从南向得到的设备性能数据；
+5. 性能模块调用Ceiolometer DB Agent保存数据的接口；
+6. Ceilometer DB Agent将设备性能数据保存到Ceilometer的数据库MongoDB中；
+
+### VM性能采集
+1. Ceilometer Compute Agent定时轮询Hypervisor上的VM性能数据；
+2. Ceilometer Compute Agent将采集到的性能数据发布到RabbitMQ上；
+3. Ceilometer Collector通过事件监听器来捕获性能数据；
+4. Ceilometer Collector将性能数据通过pipline发布到MongoDB中。
+
+###性能数据查询
+![性能数据查询](http://rnd-github.huawei.com/l00210728/nim/blob/master/performance&alarm/pic/performance-data-query.png?raw=true)
+1. NaaS-Controller Web UI调用性能模块的Restful性能查询接口；
+2. 性能模块调用南向提供的获取性能接口；
+3. 南向调用Ceilometer Restful API接口查询性能数据；
+4. Ceilometer API调用MongoDB接口获取数据；
+5. MongoDB将性能数据返回给API；
+6. Ceilometer API将数据返回给南向；
+7. 南向将数据返回给性能模块；
+8. 性能模块将数据返回给WEB UI。
+
+##实现
+1. 业务层性能管理模块封装ceilometer db接口，南向层再封装一层md-sal接口；
+2. 接口入口在南向层，然后往上调用业务层接口；
+3. 业务直接调用业务层接口；

@@ -1,0 +1,138 @@
+# 应用部署指导
+
+标签（空格分隔）： NaaS-Controller
+
+---
+
+## 背景
+由于应用文件上传放在迭代三，而应用部署在迭代二，但部署与应用文件上传相对独立，为了迭代二的正常完成，先往数据库插入相应应用信息，并在OpenStack系统里做必要的业务注册，使得应用部署流程能正常往下走。
+
+## 主要内容
+1. 数据库初始化脚本，主要是应用信息表的初始化；
+2. VM镜像在Glance中注册，直接调用胡剑飞提供的RESTful接口实现；
+3. 准备应用文件（VM、APK、设备大包及设备补丁）；
+4. Nginx支持文件下载；
+
+## 数据库脚本
+
+### 常用命令
+- 进入MongoDB
+mongo (如果没有在系统应用路径下创建软链接，则需要先进入mongo所在目录才可以执行mongo命令)
+- 创建DB
+use *db-name*
+- 创建表（Collection）
+db.createCollection("*collection-name*")
+- 插入数据
+db.*collection-name*.insert({*key1*:*value1*,*key2*:*value2*,...})
+- 删除DB
+db.dropDatabase()
+- 删除表（Collection）
+db.*collection-name*.remove()
+- 删除数据
+db.*collection_name*.remove({*key:value*})
+
+### 初始化脚本
+```sql
+use naas;
+
+db.com_huawei_controller_appmgr_model_ApplicationEntity.insert(
+{
+    _id:"cc103887-87f2-45aa-b989-c5c10c7256e7",
+	name:"eSpace",
+	displayName:"eSpace",
+	type:1,
+	desc:"A common communication tool for enterprise.",
+	vendor:"Huawei",
+	size:"50",
+	sizeUnit:"MB",
+	ver:"v1.1.12",
+	subVer:"109",
+	lastModified:"2014/12/04 11:34:56",
+	fileName:"eSpace.qcow2",
+	iconPath:"",
+	uploadPath:"",
+	downloadPath:"",
+	creater:"9870b5a8-663b-493d-b4b8-680cf9a944b7",
+	createTime:"2014/12/04 11:34:56",
+	tenantId:"9870b5a8-663b-493d-b4b8-680cf9a944b7",
+	flavorId:"",
+	cpuNum:1,
+	disc:6,
+	mem:512,
+	platformInfo:"",
+	devReq:"",
+	discUnit:"GB",
+	memUnit:"MB"
+});
+db.com_huawei_controller_appmgr_model_ApplicationEntity.insert(
+{
+    _id:"fd1a4c82-4465-4bfd-80ad-baf52cdb1985",
+	name:"Vyatta",
+	displayName:"Vyatta",
+	type:1,
+	desc:"A firewall.",
+	vendor:"Huawei",
+	size:"50",
+	sizeUnit:"MB",
+	ver:"v1.1.0",
+	subVer:"123",
+	lastModified:"2014/12/04 11:34:56",
+	fileName:"Vyatta.qcow2",
+	iconPath:"",
+	uploadPath:"",
+	downloadPath:"",
+	creater:"9870b5a8-663b-493d-b4b8-680cf9a944b7",
+	createTime:"2014/12/04 11:34:56",
+	tenantId:"9870b5a8-663b-493d-b4b8-680cf9a944b7",
+	flavorId:"",
+	cpuNum:1,
+	disc:8,
+	mem:512,
+	platformInfo:"",
+	devReq:"",
+	discUnit:"",
+	memUnit:""
+});
+db.com_huawei_controller_appmgr_model_ApplicationEntity.insert(
+{
+    _id:"960584ff-2286-4aab-ab9b-d3898b9e7710",
+	name:"WOC",
+	displayName:"WOC",
+	type:1,
+	desc:"wan optimization.",
+	vendor:"Huawei",
+	size:"50",
+	sizeUnit:"MB",
+	ver:"v2.1.0",
+	subVer:"44",
+	lastModified:"2014/12/04 11:34:56",
+	fileName:"WOC.qcow2",
+	iconPath:"",
+	uploadPath:"",
+	downloadPath:"",
+	creater:"9870b5a8-663b-493d-b4b8-680cf9a944b7",
+	createTime:"2014/12/04 11:34:56",
+	tenantId:"9870b5a8-663b-493d-b4b8-680cf9a944b7",
+	flavorId:"",
+	cpuNum:1,
+	disc:10,
+	mem:1024,
+	platformInfo:"",
+	devReq:"",
+	discUnit:"",
+	memUnit:""
+});
+```
+
+## 镜像注册
+对自带镜像的应用（VM）来说，是通过OpenStack进行部署的，所以首先要在OpenStack的Glance服务里注册，应用部署时OpenStack才知道如何创建虚机。
+
+
+## 应用文件
+[cirros镜像下载](http://download.cirros-cloud.net/0.3.1/cirros-0.3.1-x86_64-disk.img)
+
+    http://download.cirros-cloud.net/
+    cirros-0.3.1-x86_64-disk.img
+    
+
+## Nginx配置
